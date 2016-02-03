@@ -44,11 +44,17 @@ def build_graph(snakes, ladders):
             if end in ladders:
                 end = ladders[end]
             G[start].append(end)
-    print(G)
     return G
 
 """
-Find the shortest path using Dijstra's algorithm, as I remember it...
+Get the node with the minimum distance in a list of nodes
+"""
+def get_node_with_minimum_distance(queue, distances):
+    sorted_queue = sorted(queue, key=lambda x:distances[x])
+    return sorted_queue[0]
+
+"""
+Find the shortest path using Dijkstra's algorithm, as I remember it...
 I know that the graph is going to have the nodes labeled with numbers from 1 to
 the total number of nodes in the graph.
 It is also asumed that the shortest path is alwas calculated from node labeled
@@ -61,34 +67,26 @@ def find_min_number_of_rolls(G):
     """
     distance_to = {}
     whence_to = {}
+    unused_nodes = []
     for node in G:
         distance_to[node] = 1e4
         whence_to[node] = -1
+        unused_nodes.append(node)
+
     """
     The first position is the square labeled as 1
     """
     distance_to[1] = 0
-    for origin in sorted(G.keys()):
-        print("FROM : " + str(origin) + "; [" +
-              str(distance_to[origin]) + ", " +
-              str(whence_to[origin]) + "]")
+
+    while len(unused_nodes) > 0:
+        origin = get_node_with_minimum_distance(unused_nodes, distance_to)
+        unused_nodes.remove(origin)
         for destination in G[origin]:
-            print("  TO: " + str(destination) + "; [" +
-                 str(distance_to[destination]) + ", " +
-                 str(whence_to[destination]) + "]")
-            """
-            The distance is going to be measured in die rolls, hence the +1
-            """
-            if distance_to[destination] > distance_to[origin] + 1:
-                distance_to[destination] = distance_to[origin] + 1
+            temp_distance = distance_to[origin] + 1
+            if temp_distance < distance_to[destination]:
+                distance_to[destination] = temp_distance
                 whence_to[destination] = origin
-                print("  > UPDATE: [" +
-                     str(distance_to[destination]) + ", " +
-                     str(whence_to[destination]) + "]")
-    print("----")
-    print(distance_to)
-    print("----")
-    print(whence_to)
+
     """
     If the end square was not reached the return value should be -1
     """
